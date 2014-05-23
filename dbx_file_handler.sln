@@ -1,9 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dbx_file_handler", "dbx_file_handler.csproj", "{B69522CD-E3EF-4E34-9A3B-6EDE32634A32}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dbx_file_handler", "dbx_file_handler\dbx_file_handler.csproj", "{B69522CD-E3EF-4E34-9A3B-6EDE32634A32}"
+	ProjectSection(ProjectDependencies) = postProject
+		{83B212CE-DE5B-4761-BD13-FEC4EFC57B42} = {83B212CE-DE5B-4761-BD13-FEC4EFC57B42}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dbx_lib", "..\dbx_lib\dbx_lib.csproj", "{83B212CE-DE5B-4761-BD13-FEC4EFC57B42}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dbx_lib", "dbx_lib\dbx_lib.csproj", "{83B212CE-DE5B-4761-BD13-FEC4EFC57B42}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

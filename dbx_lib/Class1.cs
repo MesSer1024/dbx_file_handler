@@ -75,7 +75,7 @@ namespace dbx_lib
         }
         public System.Xml.XmlDocument findXmlObjectContaining(string s)
         {
-
+            return null;
         }
 
         public DbxType findDbxTypeInFile(StreamReader sr)
