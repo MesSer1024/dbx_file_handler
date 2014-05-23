@@ -1,4 +1,4 @@
-_exampleData/*
+_dbx_data/*
 *.suo
 */bin/*
 */obj/*
