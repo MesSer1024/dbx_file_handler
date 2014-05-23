@@ -1,0 +1,4 @@
+_exampleData/*
+*.suo
+*/bin/*
+*/obj/*
