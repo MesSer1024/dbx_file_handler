@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace dbx_lib
 {
-    class DiceAsset
+    public class DiceAsset
     {
         public string FilePath { get; set; }
         public string Guid { get; set; }
@@ -23,7 +23,7 @@ namespace dbx_lib
             Children = new List<string>();
         }
 
-        public bool addChildUnique(DiceAsset asset)
+        public bool addChild(DiceAsset asset)
         {
             if (Children.Contains(asset.Guid))
                 return false;
@@ -31,12 +31,17 @@ namespace dbx_lib
             return true;
         }
 
-        public bool addParentUnique(DiceAsset asset)
+        public bool addParent(DiceAsset asset)
         {
             if (Parents.Contains(asset.Guid))
                 return false;
             Parents.Add(asset.Guid);
             return true;
+        }
+
+        public override string ToString()
+        {
+            return string.Format("DiceAsset: [Name={3} : FilePath={0} : Guid={1} : PrimaryInstanceGuid={2} : Type={4} : NumParents={5} : NumChildren={6}", FilePath, Guid, PrimaryInstance, Name, this.Type, Parents.Count, Children.Count);
         }
     }
 }
