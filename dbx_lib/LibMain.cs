@@ -12,17 +12,9 @@ namespace dbx_lib
 {
     public class LibMain
     {
-        public enum DbxType
+        public FileInfo[] GetDbxFiles(string searchFolder)
         {
-            unknown,
-            SoundConfigurationAsset,
-            SoundPatchConfigurationAsset,
-            UIWidget,
-        }
-
-        public FileInfo[] GetDbxFiles(string path)
-        {
-            var dir = new DirectoryInfo(path);
+            var dir = new DirectoryInfo(searchFolder);
             if (!dir.Exists)
                 throw new ArgumentException("Folder does not exist");
 
@@ -40,44 +32,12 @@ namespace dbx_lib
             if (!file.Exists)
                 throw new ArgumentException("File does not exist");
 
-            var asset = findDbxAssetInfo(new StreamReader(file.FullName));
+            var asset = buildAsset(new StreamReader(file.FullName));
             asset.FilePath = file.FullName;
             return asset;
         }
 
-        //public class EarliestOccuranceSearchOptions
-        //{
-        //    public FileInfo file;
-        //    public string lineFilterToApplyRegexTo;
-        //    public int maxLinesToRead;
-        //}
-
-        //public class SearchResult
-        //{
-        //    public int lineNumber;
-        //    public string line;
-        //    public StringBuilder sb;
-        //}
-
-        //public SearchResult findEarliestOccurance(StreamReader sr, EarliestOccuranceSearchOptions options)
-        //{
-        //    ML.Assert(options.file.Exists && !String.IsNullOrEmpty(options.lineFilterToApplyRegexTo));
-
-        //    int lineNr = 0;
-        //    StringBuilder sb = new StringBuilder();
-        //    while (lineNr++ < options.maxLinesToRead)
-        //    {
-        //        var line = sr.ReadLine().Trim();
-        //        sb.AppendLine(line);
-        //        if (line.Contains(options.lineFilterToApplyRegexTo))
-        //        {
-        //            return new SearchResult() { lineNumber = lineNr, line = line, sb = sb };
-        //        }
-        //    }
-        //    return null;
-        //}
-
-        private DiceAsset findDbxAssetInfo(StreamReader sr)
+        private DiceAsset buildAsset(StreamReader sr)
         {
             DiceAsset asset = new DiceAsset();
             int lineNr = 0;
@@ -91,8 +51,8 @@ namespace dbx_lib
                 var line = sr.ReadLine();
                 if (line.Contains("primaryInstance"))
                 {
-                    var regexGuid = new Regex("[gG]uid=\"([A-Za-z0-9-]*)\"");
-                    var regexPrimaryInstance = new Regex("[pP]rimaryInstance=\"([A-Za-z0-9-]*)\"");
+                    var regexGuid = new Regex("[gG]uid=\"([A-Za-z0-9-]*)\"", RegexOptions.Compiled);
+                    var regexPrimaryInstance = new Regex("[pP]rimaryInstance=\"([A-Za-z0-9-]*)\"", RegexOptions.Compiled);
 
                     var guid = regexGuid.Match(line);
                     var primary = regexPrimaryInstance.Match(line);
@@ -128,7 +88,6 @@ namespace dbx_lib
             }
             else
                 throw new Exception("Foobar!");
-            //return DbxType.unknown;
         }
 
         private XmlElement makeNearestXmlObject(string line, StreamReader unreadData)

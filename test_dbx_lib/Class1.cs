@@ -14,8 +14,7 @@ namespace test_dbx_lib
         {
             var lib = new LibMain();
 
-            var dir = new DirectoryInfo("../../../_dbx_data_examples");
-            var files = dir.GetFiles("*.dbx");
+            var files = lib.GetDbxFiles("../../../_dbx_data_examples");
             foreach (var file in files)
             {
                 var foo = lib.GetDiceAsset(file.FullName);
