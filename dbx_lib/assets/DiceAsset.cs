@@ -17,8 +17,6 @@ namespace dbx_lib.assets
         public string Name { get; set; }
         public string Type { get; set; }
 
-        //public List<FBGuid> Parents { get; set; }
-        //public List<FBGuid> Children { get; set; }
         public Dictionary<FBGuid, bool> Parents { get; set; }
         public Dictionary<FBGuid, bool> Children { get; set; }
 
@@ -41,21 +39,14 @@ namespace dbx_lib.assets
                     var line = sr.ReadLine();
                     if (hasPrimaryInstance == false && line.Contains("primaryInstance"))
                     {
-                        asset.Guid = parseRegexGroup(line, "[gG]uid=\"([A-Za-z0-9-]*)\"", 1);
-                        asset.PrimaryInstance = parseRegexGroup(line, "[pP]rimaryInstance=\"([A-Za-z0-9-]*)\"", 1);
-
+                        asset.Guid = findSubstring(line, "uid=\"");
+                        asset.PrimaryInstance = findSubstring(line, "nce=\"");
                         hasPrimaryInstance = true;
                     }
                     else if (!parsedPrimaryInstance && hasPrimaryInstance && line.Contains(asset.PrimaryInstance))
                     {
-                        var xml = DbxUtils.buildXmlElement(line, sr);
-                        if (xml.HasAttribute("type") && xml.HasAttribute("id"))
-                        {
-                            asset.Type = xml.GetAttribute("type");
-                            asset.Name = xml.GetAttribute("id");
-                        }
-                        else
-                            throw new Exception("Foobar");
+                        asset.Type = findSubstring(line, "type=\"", "\"");
+                        asset.Name = findSubstring(line, "id=\"", "\"");
                         parsedPrimaryInstance = true;
                     }
                     else if (line.Contains("uid=\""))
@@ -70,6 +61,19 @@ namespace dbx_lib.assets
             if (!parsedPrimaryInstance)
                 throw new Exception("Foobar!");
             return asset;
+        }
+
+        private static string findSubstring(string source, string identifier, int count=36)
+        {
+            var idx = source.IndexOf(identifier);
+            return source.Substring(idx + identifier.Length, count);
+        }
+
+        private static string findSubstring(string source, string startIdentifier, string endIdentifier)
+        {
+            var startIdx = source.IndexOf(startIdentifier) + startIdentifier.Length;
+            var endIdx = source.IndexOf(endIdentifier, startIdx + 1);
+            return source.Substring(startIdx, endIdx-startIdx);
         }
 
         private static string parseRegexGroup(string line, string regexPattern, int regexGroup)
