@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 using dbx_lib.assets;
 
@@ -74,6 +75,32 @@ namespace dbx_lib
             var xml = new XmlDocument();
             xml.LoadXml(sb.ToString());
             return xml.DocumentElement;
+        }
+
+        public static string findSubstring(string source, string identifier, int count)
+        {
+            var idx = source.IndexOf(identifier);
+            return source.Substring(idx + identifier.Length, count);
+        }
+
+        public static string findSubstring(string source, string startIdentifier, string endIdentifier)
+        {
+            var startIdx = source.IndexOf(startIdentifier) + startIdentifier.Length;
+            var endIdx = source.IndexOf(endIdentifier, startIdx + 1);
+            return source.Substring(startIdx, endIdx - startIdx);
+        }
+
+        public static string parseRegexGroup(string line, string regexPattern, int regexGroup)
+        {
+            var regexGuid = new Regex(regexPattern, RegexOptions.Compiled);
+            var guid = regexGuid.Match(line);
+
+            if (!guid.Success)
+                throw new Exception("Foobar");
+            if (regexGroup >= guid.Groups.Count)
+                throw new Exception("foobar!");
+
+            return guid.Groups[regexGroup].Value;
         }
     }
 }

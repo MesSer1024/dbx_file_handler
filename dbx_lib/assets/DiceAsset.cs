@@ -39,21 +39,19 @@ namespace dbx_lib.assets
                     var line = sr.ReadLine();
                     if (hasPrimaryInstance == false && line.Contains("primaryInstance"))
                     {
-                        asset.Guid = findSubstring(line, "uid=\"");
-                        asset.PrimaryInstance = findSubstring(line, "nce=\"");
+                        asset.Guid = DbxUtils.findSubstring(line, "uid=\"", 36);
+                        asset.PrimaryInstance = DbxUtils.findSubstring(line, "nce=\"", 36);
                         hasPrimaryInstance = true;
                     }
                     else if (!parsedPrimaryInstance && hasPrimaryInstance && line.Contains(asset.PrimaryInstance))
                     {
-                        asset.Type = findSubstring(line, "type=\"", "\"");
-                        asset.Name = findSubstring(line, "id=\"", "\"");
+                        asset.Type = DbxUtils.findSubstring(line, "type=\"", "\"");
+                        asset.Name = DbxUtils.findSubstring(line, "id=\"", "\"");
                         parsedPrimaryInstance = true;
                     }
                     else if (line.Contains("uid=\""))
                     {
-                        var idx = line.IndexOf("uid=\"");
-                        var guid = line.Substring(idx + 5, 36);
-                        asset.addChildIfUnique(guid);
+                        asset.addChildIfUnique(DbxUtils.findSubstring(line, "uid=\"", 36));
                     }
                 }
             }
@@ -63,52 +61,20 @@ namespace dbx_lib.assets
             return asset;
         }
 
-        private static string findSubstring(string source, string identifier, int count=36)
-        {
-            var idx = source.IndexOf(identifier);
-            return source.Substring(idx + identifier.Length, count);
-        }
-
-        private static string findSubstring(string source, string startIdentifier, string endIdentifier)
-        {
-            var startIdx = source.IndexOf(startIdentifier) + startIdentifier.Length;
-            var endIdx = source.IndexOf(endIdentifier, startIdx + 1);
-            return source.Substring(startIdx, endIdx-startIdx);
-        }
-
-        private static string parseRegexGroup(string line, string regexPattern, int regexGroup)
-        {
-            var regexGuid = new Regex(regexPattern, RegexOptions.Compiled);
-            var guid = regexGuid.Match(line);
-
-            if (!guid.Success)
-                throw new Exception("Foobar");
-            if (regexGroup >= guid.Groups.Count)
-                throw new Exception("foobar!");
-
-            return guid.Groups[regexGroup].Value;
-        }
-
         public DiceAsset()
         {
-            //Parents = new List<FBGuid>();
-            //Children = new List<FBGuid>();
             Parents = new Dictionary<FBGuid, bool>();
             Children = new Dictionary<FBGuid, bool>();
         }
 
         public void addChildIfUnique(FBGuid guid)
         {
-            //if (!Children.Contains(guid))
-            //    Children.Add(guid);
             if (!Children.ContainsKey(guid))
                 Children.Add(guid, true);
         }
 
         public void addParentIfUnique(FBGuid guid)
         {
-            //if (!Parents.Contains(guid))
-            //    Parents.Add(guid);
             if (!Parents.ContainsKey(guid))
                 Parents.Add(guid, true);
         }
