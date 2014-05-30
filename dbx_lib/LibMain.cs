@@ -45,5 +45,10 @@ namespace dbx_lib
         {
             DbxUtils.updateAssetsRelatedToFile(file, ref dic);
         }
+
+        public void PopulateAssets(FileInfo[] files)
+        {
+            AssetDatabase.PopulateAsset(files);
+        }
     }
 }

@@ -17,18 +17,16 @@ namespace test_dbx_lib
             var dic = new List<DiceAsset>();
             var start = DateTime.Now;
             var files = lib.GetDbxFiles("../../../_dbx_data_examples");
+            lib.PopulateAssets(files);
+
+
+
             foreach (var file in files)
-            {
-                
+            {                
                 var foo = lib.GetDiceAsset(file.FullName);
                 Console.WriteLine(foo.ToString());
                 dic.Add(foo);
             }
-
-            //foreach (var file in files)
-            //{
-            //    lib.checkFileForReferences(file, ref dic);
-            //}
 
             Console.WriteLine("All done in {0}ms", (DateTime.Now - start).TotalMilliseconds);
             Console.ReadLine();

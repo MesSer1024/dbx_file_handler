@@ -31,7 +31,7 @@ namespace dbx_lib
                             var asset = identifiers[i];
                             if (asset != fileAsset && line.Contains(asset.PrimaryInstance))
                             {
-                                fileAsset.addChildIfUnique(asset.Guid);
+                                fileAsset.addChildIfUnique(asset.PrimaryInstance);
                                 //asset.addParentIfUnique(fileAsset);
                             }
                         }

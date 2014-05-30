@@ -43,12 +43,14 @@ namespace dbx_lib.assets
 
         private static void updateReferencesInDatabase()
         {
-            var allAssets = _guidAssetTable.Values.ToList();
-        }
-
-        private static void findReferences(ref DiceAsset dice)
-        {
-
+            foreach (var asset in _guidAssetTable.Values.ToList())
+            {
+                foreach (var child in asset.Children)
+                {
+                    if (_guidAssetTable.ContainsKey(child.Key))
+                        _guidAssetTable[child.Key].addParentIfUnique(asset.PrimaryInstance);
+                }
+            }
         }
 
         public static bool containsAsset(FileInfo file)
@@ -59,11 +61,6 @@ namespace dbx_lib.assets
         internal static DiceAsset getAsset(FileInfo file)
         {
             return _guidAssetTable[_fileGuidTable[file.FullName]];
-        }
-
-        private static DiceAsset getAsset(FBGuid guid)
-        {
-            return _guidAssetTable[guid];
         }
     }
 }
