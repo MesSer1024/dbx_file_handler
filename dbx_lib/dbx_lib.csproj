@@ -40,11 +40,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="assets\AssetDatabase.cs" />
     <Compile Include="LibMain.cs" />
-    <Compile Include="DiceAsset.cs" />
+    <Compile Include="assets\DiceAsset.cs" />
     <Compile Include="Logging.cs" />
     <Compile Include="ML.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="DbxUtils.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
