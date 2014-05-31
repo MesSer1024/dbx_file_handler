@@ -57,11 +57,10 @@ namespace dbx_lib.assets
             Console.WriteLine("Setting up parent/child relationships between {0} assets", _guidAssetTable.Count);
             foreach (var asset in _guidAssetTable.Values.ToList())
             {
-                foreach (var child in asset.Children)
+                foreach (var child in asset.getChildren())
                 {
-                    var childGuid = child.Key;
-                    if (_guidAssetTable.ContainsKey(childGuid))
-                        _guidAssetTable[childGuid].addParentIfUnique(asset.Guid);
+                    if (_guidAssetTable.ContainsKey(child))
+                        _guidAssetTable[child].addParentIfUnique(asset.Guid);
                 }
             }
         }
@@ -71,9 +70,17 @@ namespace dbx_lib.assets
             return _fileGuidTable.ContainsKey(file.FullName);
         }
 
+        public static bool containsAsset(FBGuid guid) {
+            return _guidAssetTable.ContainsKey(guid);
+        }
+
         internal static DiceAsset getAsset(FileInfo file)
         {
             return _guidAssetTable[_fileGuidTable[file.FullName]];
+        }
+
+        internal static DiceAsset getAsset(FBGuid guid) {
+            return _guidAssetTable[guid];
         }
     }
 }

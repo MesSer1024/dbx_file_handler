@@ -16,10 +16,8 @@ namespace dbx_lib
         public static XmlElement buildXmlElement(string firstLine, StreamReader unreadData)
         {
             firstLine = firstLine.Trim();
-            ML.Assert(firstLine[0] == '<');
 
             string xmlIdentifier = firstLine.Split(' ')[0];
-            ML.Assert(xmlIdentifier[0] == '<');
 
             var sb = new StringBuilder();
             sb.AppendLine(firstLine);

@@ -24,10 +24,13 @@ namespace dbx_lib
             return dir.GetFiles("*.dbx", SearchOption.AllDirectories);
         }
 
-        public DiceAsset GetDiceAsset(string filePath)
+        public bool HasAsset(string guid) {
+            return AssetDatabase.containsAsset(guid);
+        }
+
+        public DiceAsset GetDiceAsset(string guid)
         {
-            var file = new FileInfo(filePath);
-            return GetDiceAsset(file);
+            return AssetDatabase.getAsset(guid);
         }
 
         public DiceAsset GetDiceAsset(FileInfo file)

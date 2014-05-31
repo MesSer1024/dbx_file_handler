@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace dbx_lib.assets
 {
-    using System.IO;
-    using System.Text.RegularExpressions;
     using FBGuid = System.String;
     public class DiceAsset
     {
@@ -17,8 +16,16 @@ namespace dbx_lib.assets
         public string Name { get; set; }
         public string Type { get; set; }
 
-        public Dictionary<FBGuid, bool> Parents { get; set; }
-        public Dictionary<FBGuid, bool> Children { get; set; }
+        private Dictionary<FBGuid, bool> _parents { get; set; }
+        private Dictionary<FBGuid, bool> _children { get; set; }
+
+        public List<FBGuid> getChildren() {
+            return _children.Keys.ToList();
+        }
+
+        public List<FBGuid> getParents() {
+            return _parents.Keys.ToList();
+        }
 
         /// <summary>
         /// Parses a dbx-file, looking for information such as PartionGuid, PrimaryInstanceGuid & any references this file might have towards other files [children]
@@ -75,25 +82,25 @@ namespace dbx_lib.assets
 
         public DiceAsset()
         {
-            Parents = new Dictionary<FBGuid, bool>();
-            Children = new Dictionary<FBGuid, bool>();
+            _parents = new Dictionary<FBGuid, bool>();
+            _children = new Dictionary<FBGuid, bool>();
         }
 
         public void addChildIfUnique(FBGuid guid)
         {
-            if (!Children.ContainsKey(guid))
-                Children.Add(guid, true);
+            if (!_children.ContainsKey(guid))
+                _children.Add(guid, true);
         }
 
         public void addParentIfUnique(FBGuid guid)
         {
-            if (!Parents.ContainsKey(guid))
-                Parents.Add(guid, true);
+            if (!_parents.ContainsKey(guid))
+                _parents.Add(guid, true);
         }
 
         public override string ToString()
         {
-            return string.Format("DiceAsset: [Name={3} : FilePath={0} : Guid={1} : PrimaryInstanceGuid={2} : Type={4} : NumParents={5} : NumChildren={6}", FilePath, Guid, PrimaryInstance, Name, this.Type, Parents.Count, Children.Count);
+            return string.Format("DiceAsset: [Name={3} : FilePath={0} : Guid={1} : PrimaryInstanceGuid={2} : Type={4} : NumParents={5} : NumChildren={6}", FilePath, Guid, PrimaryInstance, Name, this.Type, _parents.Count, _children.Count);
         }
     }
 }
