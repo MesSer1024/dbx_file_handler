@@ -15,33 +15,50 @@ namespace test_dbx_lib
 
         public static void Main()
         {
+            //var lib = buildDb();
+            //printDb(lib);
+            //lib.saveDatabase("db.txt");
+
+            var lib = loadDb();
+            printDb(lib);
+            Console.ReadLine();
+        }
+
+        public static void printDb(LibMain lib) {
+            var frontendFiles = lib.GetDbxFiles(Path.Combine(ROOT_FOLDER, "FrontEnd"));
+            foreach (var file in frontendFiles) {
+                var asset = lib.GetDiceAsset(file);
+                Console.WriteLine(asset);
+                foreach (var child in asset.getChildren()) {
+                    if (lib.HasAsset(child)) {
+                        var foobar = lib.GetDiceAsset(child);
+                        Console.WriteLine("\tchild={0} parents={2} assetRef={1}", child, foobar.Name, foobar.getParents().Count);
+                    } else {
+                        Console.WriteLine("\tchild={0}", child);
+                    }
+                }
+            }
+        }
+
+        public static LibMain buildDb() {
             var lib = new LibMain();
-            var dic = new List<DiceAsset>();
             var start = DateTime.Now;
             var files = lib.GetDbxFiles(ROOT_FOLDER);
             var time1 = DateTime.Now;
             Console.WriteLine("Finding all dbx-files ={0}ms", (time1 - start).TotalMilliseconds);
             lib.PopulateAssets(files);
-
             Console.WriteLine("All done in {0}ms", (DateTime.Now - start).TotalMilliseconds);
+            return lib;
+        }
 
-            files = lib.GetDbxFiles(Path.Combine(ROOT_FOLDER, "FrontEnd"));
-            foreach (var file in files) {
-                var asset = lib.GetDiceAsset(file);
-                Console.WriteLine(asset);
-                foreach (var child in asset.getChildren()) {
-                    if(lib.HasAsset(child))
-                    {
-                        var foobar = lib.GetDiceAsset(child);
-                        Console.WriteLine("child={0} assetRef={1}", child, foobar.Name);
-                    }
-                    else {
-                        Console.WriteLine("child={0}", child);
-                    }
-                }
-            }
+        public static LibMain loadDb(string path = "db.txt") {
+            var lib = new LibMain();
+            lib.loadDatabase(path);
+            return lib;
+        }
 
-            Console.ReadLine();
+        public static void saveDb(LibMain lib, string path = "db.txt") {
+            lib.saveDatabase(path);
         }
     }
 }

@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace dbx_lib.assets
 {
     using FBGuid = System.String;
+    
     public class DiceAsset
     {
         public string FilePath { get; set; }
@@ -16,7 +18,9 @@ namespace dbx_lib.assets
         public string Name { get; set; }
         public string Type { get; set; }
 
+        [JsonProperty]
         private Dictionary<FBGuid, bool> _parents { get; set; }
+        [JsonProperty]
         private Dictionary<FBGuid, bool> _children { get; set; }
 
         public List<FBGuid> getChildren() {

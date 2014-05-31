@@ -35,19 +35,20 @@ namespace dbx_lib
 
         public DiceAsset GetDiceAsset(FileInfo file)
         {
-            if (AssetDatabase.containsAsset(file))
-                return AssetDatabase.getAsset(file);
-            if (!file.Exists)
-                throw new ArgumentException("File does not exist");
-
-            var asset = DiceAsset.Create(file);
-            asset.FilePath = file.FullName;
-            return asset;
+            return AssetDatabase.getAsset(file);
         }
 
         public void PopulateAssets(FileInfo[] files)
         {
             AssetDatabase.PopulateAsset(files);
+        }
+
+        public void saveDatabase(string path) {
+            AssetDatabase.saveDatabase(path);
+        }
+
+        public void loadDatabase(string path) {
+            AssetDatabase.loadDatabase(path);
         }
     }
 }

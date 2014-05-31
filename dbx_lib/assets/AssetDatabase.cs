@@ -4,11 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Collections.Concurrent;
 using System.IO;
-
+using Newtonsoft.Json;
 
 namespace dbx_lib.assets
 {
     using FBGuid = System.String;
+
+    class AssetDatabaseState {
+        public ConcurrentDictionary<FBGuid, DiceAsset> GuidAssetTable = new ConcurrentDictionary<FBGuid, DiceAsset>();
+        public ConcurrentDictionary<String, FBGuid> FileGuidTable = new ConcurrentDictionary<String, FBGuid>();
+    }
     
     static class AssetDatabase
     {
@@ -81,6 +86,30 @@ namespace dbx_lib.assets
 
         internal static DiceAsset getAsset(FBGuid guid) {
             return _guidAssetTable[guid];
+        }
+
+        internal static void loadDatabase(string path) {
+            var file = new FileInfo(path);
+            if (!file.Exists)
+                throw new Exception("file does not exist!");
+
+            var state = JsonConvert.DeserializeObject<AssetDatabaseState>(File.ReadAllText(file.FullName));
+            _guidAssetTable = state.GuidAssetTable;
+            _fileGuidTable = state.FileGuidTable;
+        }
+
+        internal static void saveDatabase(string path) {
+            var file = new FileInfo(path);
+            if (!file.Directory.Exists)
+                file.Directory.Create();
+
+            var state = new AssetDatabaseState() { FileGuidTable = _fileGuidTable, GuidAssetTable = _guidAssetTable };
+            var output = JsonConvert.SerializeObject(state);
+
+            using (var sw = new StreamWriter(file.FullName)) {
+                sw.Write(output);
+                sw.Flush();
+            }
         }
     }
 }
