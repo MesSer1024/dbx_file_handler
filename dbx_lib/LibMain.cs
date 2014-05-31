@@ -20,7 +20,8 @@ namespace dbx_lib
             if (!dir.Exists)
                 throw new ArgumentException("Folder does not exist");
 
-            return dir.GetFiles("*.dbx");
+            Console.WriteLine("Searching for all dbx-files in folder:\n\t{0}", dir.FullName);
+            return dir.GetFiles("*.dbx", SearchOption.AllDirectories);
         }
 
         public DiceAsset GetDiceAsset(string filePath)
@@ -39,11 +40,6 @@ namespace dbx_lib
             var asset = DiceAsset.Create(file);
             asset.FilePath = file.FullName;
             return asset;
-        }
-
-        public void checkFileForReferences(FileInfo file, ref List<DiceAsset> dic)
-        {
-            DbxUtils.updateAssetsRelatedToFile(file, ref dic);
         }
 
         public void PopulateAssets(FileInfo[] files)

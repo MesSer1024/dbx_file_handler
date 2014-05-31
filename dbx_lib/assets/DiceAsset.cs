@@ -12,14 +12,20 @@ namespace dbx_lib.assets
     public class DiceAsset
     {
         public string FilePath { get; set; }
-        public FBGuid Guid { get; set; }
-        public FBGuid PrimaryInstance { get; set; }
+        public FBGuid Guid { get; set; } //used for identifying any external links to this asset, usually coupled with ref="internal_guid" which would then refer to a specific element inside asset
+        public FBGuid PrimaryInstance { get; set; } //used for identifying what type of asset this is, basically the "root element" of a specific dbx-file.
         public string Name { get; set; }
         public string Type { get; set; }
 
         public Dictionary<FBGuid, bool> Parents { get; set; }
         public Dictionary<FBGuid, bool> Children { get; set; }
 
+        /// <summary>
+        /// Parses a dbx-file, looking for information such as PartionGuid, PrimaryInstanceGuid & any references this file might have towards other files [children]
+        /// Throws exceptions if file allready exists in database, if file does not exist or if file does not live up to minimum requirements for a dbx-file (partion guid, type and primary instance)
+        /// </summary>
+        /// <param name="dbxFile"></param>
+        /// <returns></returns>
         public static DiceAsset Create(FileInfo dbxFile)
         {
             if (AssetDatabase.containsAsset(dbxFile))
@@ -30,6 +36,7 @@ namespace dbx_lib.assets
             bool hasPrimaryInstance = false;
             bool parsedPrimaryInstance = false;
             DiceAsset asset = new DiceAsset();
+            asset.FilePath = dbxFile.FullName;
             using (var sr = new StreamReader(dbxFile.FullName))
             {
                 while (!sr.EndOfStream)
@@ -39,8 +46,8 @@ namespace dbx_lib.assets
                     var line = sr.ReadLine();
                     if (hasPrimaryInstance == false && line.Contains("primaryInstance"))
                     {
-                        asset.Guid = DbxUtils.findSubstring(line, "uid=\"", 36);
-                        asset.PrimaryInstance = DbxUtils.findSubstring(line, "nce=\"", 36);
+                        asset.Guid = DbxUtils.findSubstring(line, "uid=\"", DbxUtils.GUID_LENGTH);
+                        asset.PrimaryInstance = DbxUtils.findSubstring(line, "stance=\"", DbxUtils.GUID_LENGTH);
                         hasPrimaryInstance = true;
                     }
                     else if (!parsedPrimaryInstance && hasPrimaryInstance && line.Contains(asset.PrimaryInstance))
@@ -49,16 +56,21 @@ namespace dbx_lib.assets
                         asset.Name = DbxUtils.findSubstring(line, "id=\"", "\"");
                         parsedPrimaryInstance = true;
                     }
-                    else if (line.Contains("uid=\""))
+                    else if (line.Contains("partitionGuid=\""))
                     {
-                        asset.addChildIfUnique(DbxUtils.findSubstring(line, "uid=\"", 36));
+                        var guid = DbxUtils.findSubstring(line, "partitionGuid=\"", DbxUtils.GUID_LENGTH);
+                        asset.addChildIfUnique(guid);
                     }
                 }
             }
 
-            if (!parsedPrimaryInstance)
-                throw new Exception("Foobar!");
-            return asset;
+            bool validGuid = asset.Guid.Length == DbxUtils.GUID_LENGTH;
+            bool validPrimaryInstance = asset.PrimaryInstance.Length == DbxUtils.GUID_LENGTH;
+            bool validAssetType = asset.Type.Length > 3;
+            if (validGuid && validPrimaryInstance && validAssetType)
+                return asset;
+
+            throw new Exception("Foobar!");
         }
 
         public DiceAsset()

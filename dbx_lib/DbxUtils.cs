@@ -11,34 +11,7 @@ namespace dbx_lib
 {
     class DbxUtils
     {
-        public static void updateAssetsRelatedToFile(FileInfo file, ref List<DiceAsset> identifiers, string lineFilter = "uid=")
-        {
-            ML.Assert(file.Exists);
-
-            var references = new Dictionary<string, DiceAsset>();
-            var fileAsset = AssetDatabase.containsAsset(file) ? AssetDatabase.getAsset(file) : DiceAsset.Create(file);
-
-            using (var sr = new StreamReader(file.FullName))
-            {
-                while (!sr.EndOfStream)
-                {
-                    var line = sr.ReadLine();
-                    if (line.Contains(lineFilter))
-                    {
-                        int n = identifiers.Count;
-                        for (int i = 0; i < n; ++i)
-                        {
-                            var asset = identifiers[i];
-                            if (asset != fileAsset && line.Contains(asset.PrimaryInstance))
-                            {
-                                fileAsset.addChildIfUnique(asset.PrimaryInstance);
-                                //asset.addParentIfUnique(fileAsset);
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        public const int GUID_LENGTH = 36;
 
         public static XmlElement buildXmlElement(string firstLine, StreamReader unreadData)
         {
@@ -101,6 +74,12 @@ namespace dbx_lib
                 throw new Exception("foobar!");
 
             return guid.Groups[regexGroup].Value;
+        }
+
+        public static string findReferencedGuid(string line)
+        {
+            line = findSubstring(line, "ref=\"", " "); //
+            return line.Substring(line.LastIndexOf('/') + 1, GUID_LENGTH);
         }
     }
 }

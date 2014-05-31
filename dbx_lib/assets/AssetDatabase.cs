@@ -18,11 +18,22 @@ namespace dbx_lib.assets
 
         public static void PopulateAsset(FileInfo[] files)
         {
+            Console.WriteLine("Populating database assets: {0} files", files.Length);
+            var start = DateTime.Now;
+            int count = 0;
             foreach (var file in files)
             {
                 doBuildAsset(file);
+                count++;
+                if (count % 101 == 100)
+                {
+                    Console.Write(".");
+                }
             }
+            Console.WriteLine("\nBuilding/Parsing {0} assets took {1}ms", count, (DateTime.Now - start).TotalMilliseconds);
+            start = DateTime.Now;
             updateReferencesInDatabase();
+            Console.WriteLine("Checking cross-references for {0} assets took {1}ms", _guidAssetTable.Count, (DateTime.Now - start).TotalMilliseconds);
         }
 
         public static void PopulateAsset(FileInfo file)
@@ -37,18 +48,20 @@ namespace dbx_lib.assets
                 throw new Exception("Todo? Allow? Replace? Exception? Overwrite?");
 
             var asset = DiceAsset.Create(dbxFile);
-            _guidAssetTable.TryAdd(asset.PrimaryInstance, asset);
-            _fileGuidTable.TryAdd(dbxFile.FullName, asset.PrimaryInstance);
+            _guidAssetTable.TryAdd(asset.Guid, asset);
+            _fileGuidTable.TryAdd(dbxFile.FullName, asset.Guid);
         }
 
         private static void updateReferencesInDatabase()
         {
+            Console.WriteLine("Setting up parent/child relationships between {0} assets", _guidAssetTable.Count);
             foreach (var asset in _guidAssetTable.Values.ToList())
             {
                 foreach (var child in asset.Children)
                 {
-                    if (_guidAssetTable.ContainsKey(child.Key))
-                        _guidAssetTable[child.Key].addParentIfUnique(asset.PrimaryInstance);
+                    var childGuid = child.Key;
+                    if (_guidAssetTable.ContainsKey(childGuid))
+                        _guidAssetTable[childGuid].addParentIfUnique(asset.Guid);
                 }
             }
         }
