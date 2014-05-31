@@ -15,17 +15,17 @@ namespace test_dbx_lib
 
         public static void Main()
         {
-            //var lib = buildDb();
-            //printDb(lib);
-            //lib.saveDatabase("db.txt");
-
-            var lib = loadDb();
+            var lib = buildDb();
             printDb(lib);
+            lib.saveDatabase("db.txt");
+
+            //var lib = loadDb();
+            //printDb(lib);
             Console.ReadLine();
         }
 
         public static void printDb(LibMain lib) {
-            var frontendFiles = lib.GetDbxFiles(Path.Combine(ROOT_FOLDER, "FrontEnd"));
+            var frontendFiles = lib.GetDbxFiles(Path.Combine(ROOT_FOLDER, "frontend"));
             foreach (var file in frontendFiles) {
                 var asset = lib.GetDiceAsset(file);
                 Console.WriteLine(asset);

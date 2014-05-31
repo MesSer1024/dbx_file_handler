@@ -54,7 +54,7 @@ namespace dbx_lib.assets
 
             var asset = DiceAsset.Create(dbxFile);
             _guidAssetTable.TryAdd(asset.Guid, asset);
-            _fileGuidTable.TryAdd(dbxFile.FullName, asset.Guid);
+            _fileGuidTable.TryAdd(dbxFile.FullName.ToLower(), asset.Guid);
         }
 
         private static void updateReferencesInDatabase()
@@ -72,7 +72,7 @@ namespace dbx_lib.assets
 
         public static bool containsAsset(FileInfo file)
         {
-            return _fileGuidTable.ContainsKey(file.FullName);
+            return _fileGuidTable.ContainsKey(file.FullName.ToLower());
         }
 
         public static bool containsAsset(FBGuid guid) {
@@ -81,7 +81,7 @@ namespace dbx_lib.assets
 
         internal static DiceAsset getAsset(FileInfo file)
         {
-            return _guidAssetTable[_fileGuidTable[file.FullName]];
+            return _guidAssetTable[_fileGuidTable[file.FullName.ToLower()]];
         }
 
         internal static DiceAsset getAsset(FBGuid guid) {
@@ -93,7 +93,7 @@ namespace dbx_lib.assets
             if (!file.Exists)
                 throw new Exception("file does not exist!");
 
-            var state = JsonConvert.DeserializeObject<AssetDatabaseState>(File.ReadAllText(file.FullName));
+            var state = JsonConvert.DeserializeObject<AssetDatabaseState>(File.ReadAllText(file.FullName.ToLower()));
             _guidAssetTable = state.GuidAssetTable;
             _fileGuidTable = state.FileGuidTable;
         }
@@ -106,7 +106,7 @@ namespace dbx_lib.assets
             var state = new AssetDatabaseState() { FileGuidTable = _fileGuidTable, GuidAssetTable = _guidAssetTable };
             var output = JsonConvert.SerializeObject(state);
 
-            using (var sw = new StreamWriter(file.FullName)) {
+            using (var sw = new StreamWriter(file.FullName.ToLower())) {
                 sw.Write(output);
                 sw.Flush();
             }

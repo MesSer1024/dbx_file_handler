@@ -47,7 +47,7 @@ namespace dbx_lib.assets
             bool hasPrimaryInstance = false;
             bool parsedPrimaryInstance = false;
             DiceAsset asset = new DiceAsset();
-            asset.FilePath = dbxFile.FullName;
+            asset.FilePath = dbxFile.FullName.ToLower();
             using (var sr = new StreamReader(dbxFile.FullName))
             {
                 while (!sr.EndOfStream)

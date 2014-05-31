@@ -16,10 +16,9 @@ namespace dbx_lib
     {
         public FileInfo[] GetDbxFiles(string rootFolder)
         {
-            var dir = new DirectoryInfo(rootFolder);
+            var dir = new DirectoryInfo(rootFolder.ToLower());
             if (!dir.Exists)
                 throw new ArgumentException("Folder does not exist");
-
             Console.WriteLine("Searching for all dbx-files in folder:\n\t{0}", dir.FullName);
             return dir.GetFiles("*.dbx", SearchOption.AllDirectories);
         }
