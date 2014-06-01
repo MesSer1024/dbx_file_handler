@@ -3,6 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        
+        <DockPanel>
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="Foobar" />
+            </Menu>
+            <DockPanel Name="_content" />
+        </DockPanel>
     </Grid>
 </Window>

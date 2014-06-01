@@ -27,6 +27,10 @@ namespace dbx_lib
             return AssetDatabase.containsAsset(guid);
         }
 
+        public bool HasAsset(FileInfo file) {
+            return AssetDatabase.containsAsset(file);
+        }
+
         public DiceAsset GetDiceAsset(string guid)
         {
             return AssetDatabase.getAsset(guid);
@@ -48,6 +52,10 @@ namespace dbx_lib
 
         public void loadDatabase(string path) {
             AssetDatabase.loadDatabase(path);
+        }
+
+        public List<string> getAllFilePaths() {
+            return AssetDatabase.getAllFilePaths();
         }
     }
 }

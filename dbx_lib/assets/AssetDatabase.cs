@@ -98,6 +98,10 @@ namespace dbx_lib.assets
             _fileGuidTable = state.FileGuidTable;
         }
 
+        internal static List<string> getAllFilePaths() {
+            return _fileGuidTable.Keys.ToList();
+        }
+
         internal static void saveDatabase(string path) {
             var file = new FileInfo(path);
             if (!file.Directory.Exists)

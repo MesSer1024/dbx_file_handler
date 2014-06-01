@@ -1,0 +1,49 @@
+-------------------------------------
+			CHEAT SHEET
+-------------------------------------
+<partition guid="e7ce87b2-bd63-4025-b9de-2b6710b5e5ea" primaryInstance="4d628453-a1f9-4b00-909d-60de16e03924" exportMode="Limited">
+	[create a new filet asset, which can be referenced by "partionGuid" and then that asset have several "instances" inside it with unique guids
+<instance guid="" /> 
+	[creating a new instance that can be referenced from this file]
+
+ref="[a-z0-9/_]*[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}"
+
+	om en rad innehåller en "ref=" men ingen "partionGuid" så är det en "local reference" dvs, inom samma fil [dbx-fil]
+	
+partitionGuid= [extern referens till en annan fil, dvs "guid" på en "partion"]
+ref= [vilken instans innuti en partion som man refererar till]
+
+-------------------
+UIHudLogic
+-------------------
+	<instance guid="174c9c5e-1c29-44f5-83a5-cf8625ea83fe" type="Entity.LogicPrefabReferenceObjectData">
+		<field name="Blueprint" ref="uiawardsoverlaylogic/d2c516db-00ee-dfec-7b69-a8a8c4f5cd17" partitionGuid="21818e97-753b-11e2-bbe5-8da0a5227f43" />
+	</instance>
+
+-------------------
+UIAwardsOverlayLogic
+-------------------
+<partition guid="21818e97-753b-11e2-bbe5-8da0a5227f43" primaryInstance="d2c516db-00ee-dfec-7b69-a8a8c4f5cd17" exportMode="All">
+	<instance id="UIAwardsOverlayLogic" guid="d2c516db-00ee-dfec-7b69-a8a8c4f5cd17" type="Entity.LogicPrefabBlueprint" exported="True">
+		
+	ref= [link to actual element inside that instance]
+	partionGuid = [link to xml-object/dbx file]
+	
+	
+-------------------
+-------------------
+UIMetaDataUtils
+-------------------
+	<instance guid="695217d3-3cb0-4172-ba0c-82cdaba3993a" type="TunguskaShared.UIAwardDescription">
+		<array name="AwardTrees">
+			<item ref="persistence/awards/awards/4d628453-a1f9-4b00-909d-60de16e03924" partitionGuid="e7ce87b2-bd63-4025-b9de-2b6710b5e5ea" />
+		</array>
+	</instance>
+
+-------------------
+Awards.dbx
+-------------------
+<partition guid="e7ce87b2-bd63-4025-b9de-2b6710b5e5ea" primaryInstance="4d628453-a1f9-4b00-909d-60de16e03924" exportMode="Limited">
+	<instance id="Awards" guid="4d628453-a1f9-4b00-909d-60de16e03924" type="TunguskaShared.AwardDataTree" exported="True">
+
+-------------------------------------

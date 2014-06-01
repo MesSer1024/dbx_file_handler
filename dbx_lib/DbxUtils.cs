@@ -76,7 +76,7 @@ namespace dbx_lib
 
         public static string findReferencedGuid(string line)
         {
-            line = findSubstring(line, "ref=\"", " "); //
+            line = findSubstring(line, "ref=\"", " ");
             return line.Substring(line.LastIndexOf('/') + 1, GUID_LENGTH);
         }
 

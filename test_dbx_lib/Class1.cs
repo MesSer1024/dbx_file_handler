@@ -24,26 +24,10 @@ namespace test_dbx_lib
             Console.ReadLine();
         }
 
-        public static void printDb(LibMain lib) {
-            var frontendFiles = lib.GetDbxFiles(Path.Combine(ROOT_FOLDER, "frontend"));
-            foreach (var file in frontendFiles) {
-                var asset = lib.GetDiceAsset(file);
-                Console.WriteLine(asset);
-                foreach (var child in asset.getChildren()) {
-                    if (lib.HasAsset(child)) {
-                        var foobar = lib.GetDiceAsset(child);
-                        Console.WriteLine("\tchild={0} parents={2} assetRef={1}", child, foobar.Name, foobar.getParents().Count);
-                    } else {
-                        Console.WriteLine("\tchild={0}", child);
-                    }
-                }
-            }
-        }
-
-        public static LibMain buildDb() {
+        public static LibMain buildDb(string rootFolder = ROOT_FOLDER) {
             var lib = new LibMain();
             var start = DateTime.Now;
-            var files = lib.GetDbxFiles(ROOT_FOLDER);
+            var files = lib.GetDbxFiles(rootFolder);
             var time1 = DateTime.Now;
             Console.WriteLine("Finding all dbx-files ={0}ms", (time1 - start).TotalMilliseconds);
             lib.PopulateAssets(files);
@@ -59,6 +43,22 @@ namespace test_dbx_lib
 
         public static void saveDb(LibMain lib, string path = "db.txt") {
             lib.saveDatabase(path);
+        }
+
+        public static void printDb(LibMain lib) {
+            var frontendFiles = lib.GetDbxFiles(Path.Combine(ROOT_FOLDER, "frontend"));
+            foreach (var file in frontendFiles) {
+                var asset = lib.GetDiceAsset(file);
+                Console.WriteLine(asset);
+                foreach (var child in asset.getChildren()) {
+                    if (lib.HasAsset(child)) {
+                        var foobar = lib.GetDiceAsset(child);
+                        Console.WriteLine("\tchild={0} parents={2} assetRef={1}", child, foobar.Name, foobar.getParents().Count);
+                    } else {
+                        Console.WriteLine("\tchild={0}", child);
+                    }
+                }
+            }
         }
     }
 }
