@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using dbx_lib;
+using dbx_lib.assets;
 
 namespace dbx_file_handler {
     /// <summary>
@@ -81,6 +82,8 @@ namespace dbx_file_handler {
                     var asset = DbxApplication.DBX.GetDiceAsset(file);
                     _content.Children.Add(new TextBox() { Text = createAssetInfoString(asset) });
                 }
+
+                var assets = getAssetsRelatedToItem(data);
             } else {
                 _content.Children.Add(new Label() { Content = "Null value selected in list to left!" });
             }
@@ -213,6 +216,15 @@ namespace dbx_file_handler {
 
         public void onDeinit() {
             //throw new NotImplementedException();
+        }
+
+        private List<DiceAsset> getAssetsRelatedToItem(AssetDirectoryEncapsulator asset)
+        {
+            List<DiceAsset> assets = new List<DiceAsset>();
+            for(int i=asset.IndexStart; i <= asset.IndexEnd; ++i) {
+                assets.Add(DbxApplication.DBX.GetDiceAsset(new FileInfo(_files[i])));
+            }
+            return assets;
         }
     }
 }
