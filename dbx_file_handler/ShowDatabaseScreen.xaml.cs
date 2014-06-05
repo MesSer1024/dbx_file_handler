@@ -58,13 +58,10 @@ namespace dbx_file_handler {
         }
         
         private List<string> _files;
-        private TreeView _tree;
         private List<AssetDirectoryEncapsulator> _assets;
 
         public ShowDatabaseScreen() {
             InitializeComponent();
-            _tree = new TreeView();
-            _left.Children.Add(_tree);
             _files = DbxApplication.DBX.getAllFilePaths();
             _files.Sort();
             _assets = new List<AssetDirectoryEncapsulator>();
@@ -109,7 +106,7 @@ namespace dbx_file_handler {
                     if (DbxApplication.DBX.HasAsset(parent))
                         allParents.Add(DbxApplication.DBX.GetDiceAsset(parent));
                     else
-                        missingAssets.AppendLine(string.Format("{0}: ref={1}", foo.FilePath, parent));
+                        missingAssets.AppendLine(string.Format("{0} :: ref={1}", foo.FilePath, parent));
                 }
 
                 foreach (var child in foo.getChildren())
@@ -135,40 +132,45 @@ namespace dbx_file_handler {
 
             var p = new Paragraph();
             p.Inlines.Add(sbparent.ToString());
+            p.FontSize = 11;
+            p.FontFamily = new FontFamily("segoe ui");
             _parents.Document = new FlowDocument(p);
 
             p = new Paragraph();
+            p.FontFamily = new FontFamily("segoe ui");
             p.Inlines.Add(sbchild.ToString());
+            p.FontSize = 11;
             _children.Document = new FlowDocument(p);
 
             string s = "";
-            if (data.IndexStart == data.IndexEnd && DbxApplication.DBX.HasAsset(file))
-            {
+            if (data.IndexStart == data.IndexEnd && DbxApplication.DBX.HasAsset(file)) {
                 s += createAssetInfoString(asset);
+            } else {
+                s += item.Path + Environment.NewLine;
             }
 
             if (missingAssets.Length > 0)
             {
-                s += "\nMissing Assets:\n" + missingAssets.ToString();
+                s += "\nFiles containing links to items not existing in DB:\n" + missingAssets.ToString();
             }
             _assetInfo.Text = s;
         }
 
         void _tree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
-            _assetInfo.Text = "";
-            _parents.Document = null;
-            _children.Document = null;
-            var item = (DiceAssetTreeItem)_tree.SelectedItem;
-            if (item != null) {
-                var data = _assets[item.ListIndex];
-                var file = new FileInfo(data.FullPath);
-                if (data.IndexStart == data.IndexEnd && DbxApplication.DBX.HasAsset(file)) {
-                    var asset = DbxApplication.DBX.GetDiceAsset(file);
-                    _assetInfo.Text = createAssetInfoString(asset);
-                }
-            } else {
-                _assetInfo.Text = "Null value selected in TreeView!";
-            }
+            //_assetInfo.Text = "";
+            //_parents.Document = null;
+            //_children.Document = null;
+            //var item = (DiceAssetTreeItem)_tree.SelectedItem;
+            //if (item != null) {
+            //    var data = _assets[item.ListIndex];
+            //    var file = new FileInfo(data.FullPath);
+            //    if (data.IndexStart == data.IndexEnd && DbxApplication.DBX.HasAsset(file)) {
+            //        var asset = DbxApplication.DBX.GetDiceAsset(file);
+            //        _assetInfo.Text = createAssetInfoString(asset);
+            //    }
+            //} else {
+            //    _assetInfo.Text = "Null value selected in TreeView!";
+            //}
         }
 
         private string createAssetInfoString(dbx_lib.assets.DiceAsset asset) {
