@@ -30,7 +30,7 @@ namespace dbx_lib.assets
             {
                 doBuildAsset(file);
                 count++;
-                if (count % 101 == 100)
+                if (count % 100 == 99)
                 {
                     Console.Write(".");
                 }

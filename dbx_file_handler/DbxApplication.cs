@@ -16,6 +16,9 @@ namespace dbx_file_handler {
 
         public static void init() {
             DBX = new LibMain();
+            ScreenStack = new Stack<IScreen>();
         }
+
+        public static Stack<IScreen> ScreenStack { get; private set; }
     }
 }

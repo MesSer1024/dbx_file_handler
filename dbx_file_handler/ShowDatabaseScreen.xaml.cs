@@ -73,17 +73,36 @@ namespace dbx_file_handler {
         }
 
         void _tree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
+            _assetInfo.Text = "";
+            _parents.Text = "";
+            _children.Text = "";
             var item = (DiceAssetTreeItem)_tree.SelectedItem;
-            _content.Children.Clear();
             if (item != null) {
                 var data = _assets[item.ListIndex];
                 var file = new FileInfo(data.FullPath);
                 if (DbxApplication.DBX.HasAsset(file)) {
                     var asset = DbxApplication.DBX.GetDiceAsset(file);
-                    _content.Children.Add(new TextBox() { Text = createAssetInfoString(asset) });
+                    _assetInfo.Text = createAssetInfoString(asset);
+                    var assets = getAssetsRelatedToItem(data);
+                    var sbparent = new StringBuilder();
+                    var sbchild = new StringBuilder();
+                    foreach (var foo in assets)
+                    {
+                        var parents = foo.getParents();
+                        foreach(var parent in parents) {
+                            sbparent.AppendLine(parent);
+                        }
+
+                        var children = foo.getChildren();
+                        foreach (var child in children)
+                        {
+                            sbchild.AppendLine(child);
+                        }
+                    }
+                    _parents.Text = sbparent.ToString();
+                    _children.Text = sbchild.ToString();
                 }
 
-                var assets = getAssetsRelatedToItem(data);
             } else {
                 _content.Children.Add(new Label() { Content = "Null value selected in list to left!" });
             }
