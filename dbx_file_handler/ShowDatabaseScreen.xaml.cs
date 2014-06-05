@@ -71,11 +71,24 @@ namespace dbx_file_handler {
             _tree.SelectedItemChanged += _tree_SelectedItemChanged;
             _statusBar.Content = "Assets in Database: " + _files.Count;
             _tree.MouseRightButtonUp += _tree_MouseRightButtonUp;
+            _tree.KeyUp += _tree_KeyUp;
+        }
+
+        void _tree_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter || e.Key == Key.Space || e.Key == Key.Return)
+            {
+                showAdvancedAssetInformation((DiceAssetTreeItem)_tree.SelectedItem);
+            }
         }
 
         void _tree_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
-            var item = (DiceAssetTreeItem)_tree.SelectedItem;
+            showAdvancedAssetInformation((DiceAssetTreeItem)_tree.SelectedItem);
+        }
+
+        void showAdvancedAssetInformation(DiceAssetTreeItem item)
+        {
             if (item == null)
                 return;
 
@@ -138,7 +151,7 @@ namespace dbx_file_handler {
             {
                 s += "\nMissing Assets:\n" + missingAssets.ToString();
             }
-            _assetInfo.Text = s;            
+            _assetInfo.Text = s;
         }
 
         void _tree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
