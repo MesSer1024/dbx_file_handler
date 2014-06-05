@@ -70,41 +70,91 @@ namespace dbx_file_handler {
             _assets = new List<AssetDirectoryEncapsulator>();
             _tree.SelectedItemChanged += _tree_SelectedItemChanged;
             _statusBar.Content = "Assets in Database: " + _files.Count;
+            _tree.MouseRightButtonUp += _tree_MouseRightButtonUp;
+        }
+
+        void _tree_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            var item = (DiceAssetTreeItem)_tree.SelectedItem;
+            if (item == null)
+                return;
+
+            var data = _assets[item.ListIndex];
+            var file = new FileInfo(data.FullPath);
+            var asset = DbxApplication.DBX.GetDiceAsset(file);
+            var assets = getAssetsRelatedToItem(data);
+            var sbparent = new StringBuilder();
+            var sbchild = new StringBuilder();
+            var missingAssets = new StringBuilder();
+
+            List<DiceAsset> allParents = new List<DiceAsset>();
+            List<DiceAsset> allChildren = new List<DiceAsset>();
+            foreach (var foo in assets)
+            {
+                foreach (var parent in foo.getParents())
+                {
+                    if (DbxApplication.DBX.HasAsset(parent))
+                        allParents.Add(DbxApplication.DBX.GetDiceAsset(parent));
+                    else
+                        missingAssets.AppendLine(string.Format("{0}: ref={1}", foo.FilePath, parent));
+                }
+
+                foreach (var child in foo.getChildren())
+                {
+                    if (DbxApplication.DBX.HasAsset(child))
+                        allChildren.Add(DbxApplication.DBX.GetDiceAsset(child));
+                    else
+                        missingAssets.AppendLine(string.Format("{0}: ref={1}", foo.FilePath, child));
+                }
+            }
+
+            var parents = allParents.Distinct();
+            var children = allChildren.Distinct();
+
+            foreach (var par in parents)
+            {
+                sbparent.AppendLine(par.FilePath);
+            }
+            foreach (var c in children)
+            {
+                sbchild.AppendLine(c.FilePath);
+            }
+
+            var p = new Paragraph();
+            p.Inlines.Add(sbparent.ToString());
+            _parents.Document = new FlowDocument(p);
+
+            p = new Paragraph();
+            p.Inlines.Add(sbchild.ToString());
+            _children.Document = new FlowDocument(p);
+
+            string s = "";
+            if (data.IndexStart == data.IndexEnd && DbxApplication.DBX.HasAsset(file))
+            {
+                s += createAssetInfoString(asset);
+            }
+
+            if (missingAssets.Length > 0)
+            {
+                s += "\nMissing Assets:\n" + missingAssets.ToString();
+            }
+            _assetInfo.Text = s;            
         }
 
         void _tree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
             _assetInfo.Text = "";
-            _parents.Text = "";
-            _children.Text = "";
+            _parents.Document = null;
+            _children.Document = null;
             var item = (DiceAssetTreeItem)_tree.SelectedItem;
             if (item != null) {
                 var data = _assets[item.ListIndex];
                 var file = new FileInfo(data.FullPath);
-                if (DbxApplication.DBX.HasAsset(file)) {
+                if (data.IndexStart == data.IndexEnd && DbxApplication.DBX.HasAsset(file)) {
                     var asset = DbxApplication.DBX.GetDiceAsset(file);
                     _assetInfo.Text = createAssetInfoString(asset);
-                    var assets = getAssetsRelatedToItem(data);
-                    var sbparent = new StringBuilder();
-                    var sbchild = new StringBuilder();
-                    foreach (var foo in assets)
-                    {
-                        var parents = foo.getParents();
-                        foreach(var parent in parents) {
-                            sbparent.AppendLine(parent);
-                        }
-
-                        var children = foo.getChildren();
-                        foreach (var child in children)
-                        {
-                            sbchild.AppendLine(child);
-                        }
-                    }
-                    _parents.Text = sbparent.ToString();
-                    _children.Text = sbchild.ToString();
                 }
-
             } else {
-                _content.Children.Add(new Label() { Content = "Null value selected in list to left!" });
+                _assetInfo.Text = "Null value selected in TreeView!";
             }
         }
 

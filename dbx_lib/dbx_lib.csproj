@@ -32,7 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\config_file_sharer\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\DatakeyCrawler\recent_build\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
