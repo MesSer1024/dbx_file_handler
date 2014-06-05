@@ -108,8 +108,8 @@ namespace dbx_file_handler {
                 }
             }
 
-            var parents = allParents.Distinct();
-            var children = allChildren.Distinct();
+            var parents = allParents.Distinct().ToList().OrderBy(a => a.FilePath);
+            var children = allChildren.Distinct().ToList().OrderBy(a => a.FilePath);
 
             foreach (var par in parents)
             {
