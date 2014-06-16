@@ -20,69 +20,74 @@ namespace dbx_file_handler {
     /// <summary>
     /// Interaction logic for ShowDatabaseScreen.xaml
     /// </summary>
-    public partial class ShowDatabaseScreen : UserControl, IScreen {
-        private class DiceAssetTreeItem : TreeViewItem {
-            public int ListIndex { get; private set; }
-            public string Path { get; private set; }
+    public partial class ShowDatabaseScreen : UserControl, IScreen
+    {
+        #region HelpClasses
+        private class AssetDirectoryEncapsulator : TreeViewItem {
+            public bool HaveBuiltChildAssets { get; set; }
+            public int IndexEnd { get; set; }
+            public int IndexStart { get; set; }
+            public string FolderName { get { return base.Header.ToString(); } set { base.Header = value; } }
+            public string FullPath { get; set; }
+            public List<AssetDirectoryEncapsulator> Children { get; private set; }
+            public AssetDirectoryEncapsulator AssetParent { get; set; }
+            public int ListIndex { get; set; }
 
-            public DiceAssetTreeItem(string path, int listIndex) {
-                base.Header = path;
-                Path = path;
-                ListIndex = listIndex;
+            public AssetDirectoryEncapsulator(string folderName) {
+                Children = new List<AssetDirectoryEncapsulator>(0);
+                base.Header = folderName;
                 base.ExpandSubtree();
                 base.IsExpanded = false;
             }
-        }
-
-        private class AssetDirectoryEncapsulator {
-            public bool Expanded { get; set; }
-            public int IndexEnd { get; set; }
-            public int IndexStart { get; set; }
-            public string FolderName { get; set; }
-            public string FullPath { get; set; }
-            public List<AssetDirectoryEncapsulator> Children { get; private set; }
-            public AssetDirectoryEncapsulator Parent { get; set; }
-            public int ListIndex { get; set; }
-
-            public AssetDirectoryEncapsulator() {
-                Children = new List<AssetDirectoryEncapsulator>(0);
-            }
 
             public void addChild(AssetDirectoryEncapsulator asset) {
-                if (asset.Parent != null)
+                if (asset.AssetParent != null)
                     throw new Exception("Foobar!");
 
                 Children.Add(asset);
-                asset.Parent = this;
+                asset.AssetParent = this;
             }
         }
-        
+        #endregion
+
         private List<string> _files;
-        private TreeView _tree;
         private List<AssetDirectoryEncapsulator> _assets;
+        private IEnumerable<DiceAsset> _excludedItems;
+        private AssetDirectoryEncapsulator _lastSelectedItem;
+        private AssetDirectoryEncapsulator SelectedItem { get { return _tree.SelectedItem as AssetDirectoryEncapsulator; } }
 
         public ShowDatabaseScreen() {
             InitializeComponent();
-            _tree = new TreeView();
-            _left.Children.Add(_tree);
+            _excludedItems = new List<DiceAsset>();
             _files = DbxApplication.DBX.getAllFilePaths();
             _files.Sort();
             _assets = new List<AssetDirectoryEncapsulator>();
-            _tree.SelectedItemChanged += _tree_SelectedItemChanged;
             _statusBar.Content = "Assets in Database: " + _files.Count;
-            _tree.MouseRightButtonUp += _tree_MouseRightButtonUp;
+            _tree.KeyUp += _tree_KeyUp;
         }
 
-        void _tree_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        void _tree_KeyUp(object sender, KeyEventArgs e)
         {
-            var item = (DiceAssetTreeItem)_tree.SelectedItem;
+            if (e.Key == Key.Enter || e.Key == Key.Space || e.Key == Key.Return)
+            {
+                showAdvancedAssetInformation((AssetDirectoryEncapsulator)_tree.SelectedItem);
+            }
+        }
+
+        void showAdvancedAssetInformation(AssetDirectoryEncapsulator item)
+        {
             if (item == null)
                 return;
+            if (_lastSelectedItem != null)
+            {
+                _lastSelectedItem.Background = item.Background;
+            }
 
-            var data = _assets[item.ListIndex];
-            var file = new FileInfo(data.FullPath);
-            var asset = DbxApplication.DBX.GetDiceAsset(file);
-            var assets = getAssetsRelatedToItem(data);
+            _lastSelectedItem = item;
+            item.Background = Brushes.Yellow;
+
+            var file = new FileInfo(item.FullPath);
+            var assets = getAssetsRelatedToItem(item);
             var sbparent = new StringBuilder();
             var sbchild = new StringBuilder();
             var missingAssets = new StringBuilder();
@@ -96,7 +101,7 @@ namespace dbx_file_handler {
                     if (DbxApplication.DBX.HasAsset(parent))
                         allParents.Add(DbxApplication.DBX.GetDiceAsset(parent));
                     else
-                        missingAssets.AppendLine(string.Format("{0}: ref={1}", foo.FilePath, parent));
+                        missingAssets.AppendLine(string.Format("{0} :: ref={1}", foo.FilePath, parent));
                 }
 
                 foreach (var child in foo.getChildren())
@@ -108,8 +113,8 @@ namespace dbx_file_handler {
                 }
             }
 
-            var parents = allParents.Distinct().ToList().OrderBy(a => a.FilePath);
-            var children = allChildren.Distinct().ToList().OrderBy(a => a.FilePath);
+            var parents = allParents.Except(_excludedItems).Distinct().OrderBy(a => a.FilePath);
+            var children = allChildren.Except(_excludedItems).Distinct().OrderBy(a => a.FilePath);
 
             foreach (var par in parents)
             {
@@ -119,43 +124,32 @@ namespace dbx_file_handler {
             {
                 sbchild.AppendLine(c.FilePath);
             }
-
+            _pHeader.Content = String.Format("Parents: ({0})", parents.Count());
+            _cHeader.Content = String.Format("Children: ({0})", children.Count());
             var p = new Paragraph();
             p.Inlines.Add(sbparent.ToString());
+            p.FontSize = 11;
+            p.FontFamily = new FontFamily("segoe ui");
             _parents.Document = new FlowDocument(p);
 
             p = new Paragraph();
+            p.FontFamily = new FontFamily("segoe ui");
             p.Inlines.Add(sbchild.ToString());
+            p.FontSize = 11;
             _children.Document = new FlowDocument(p);
 
             string s = "";
-            if (data.IndexStart == data.IndexEnd && DbxApplication.DBX.HasAsset(file))
-            {
-                s += createAssetInfoString(asset);
+            if (item.IndexStart == item.IndexEnd && DbxApplication.DBX.HasAsset(file)) {
+                s += createAssetInfoString(DbxApplication.DBX.GetDiceAsset(file));
+            } else {
+                s += item.FolderName + Environment.NewLine;
             }
 
             if (missingAssets.Length > 0)
             {
-                s += "\nMissing Assets:\n" + missingAssets.ToString();
+                s += "\nFiles containing links to items not existing in DB:\n" + missingAssets.ToString();
             }
-            _assetInfo.Text = s;            
-        }
-
-        void _tree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
-            _assetInfo.Text = "";
-            _parents.Document = null;
-            _children.Document = null;
-            var item = (DiceAssetTreeItem)_tree.SelectedItem;
-            if (item != null) {
-                var data = _assets[item.ListIndex];
-                var file = new FileInfo(data.FullPath);
-                if (data.IndexStart == data.IndexEnd && DbxApplication.DBX.HasAsset(file)) {
-                    var asset = DbxApplication.DBX.GetDiceAsset(file);
-                    _assetInfo.Text = createAssetInfoString(asset);
-                }
-            } else {
-                _assetInfo.Text = "Null value selected in TreeView!";
-            }
+            _assetInfo.Text = s;
         }
 
         private string createAssetInfoString(dbx_lib.assets.DiceAsset asset) {
@@ -175,13 +169,34 @@ namespace dbx_file_handler {
 
             var samePath = getCommonString(path1, path2);
             samePath = samePath.Substring(0, samePath.LastIndexOf('\\') + 1);
+            try
+            {
+                var asset = new AssetDirectoryEncapsulator(samePath) { IndexStart = 0, IndexEnd = _files.Count - 1, ListIndex = 0, FullPath = samePath };
+                _assets.Add(asset);
+                SetTreeStyle(asset, true);
+                asset.Expanded += item_Expanded;
+                _tree.Items.Add(asset);
+                asset.Items.Add("");
+                _tree.SelectedItemChanged += _tree_SelectedItemChanged;
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+        }
 
-            var asset = new AssetDirectoryEncapsulator() { IndexStart = 0, IndexEnd = _files.Count - 1, FolderName = samePath, FullPath = samePath, ListIndex = 0 };
-            _assets.Add(asset);
-            var item = new DiceAssetTreeItem(asset.FolderName, asset.ListIndex);
-            item.Expanded += item_Expanded;
-            _tree.Items.Add(item);
-            item.Items.Add("");
+        void _tree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            //clearInfoText();
+        }
+
+        private void clearInfoText()
+        {
+            _pHeader.Content = "Parents";
+            _cHeader.Content = "Children";
+            _assetInfo.Text = "";
+            _parents.Document = null;
+            _children.Document = null;
         }
 
         private string getCommonString(string s1, string s2) {
@@ -199,13 +214,13 @@ namespace dbx_file_handler {
         }
 
         private void getExpandedView(ref AssetDirectoryEncapsulator assets) {
-            if (assets.Expanded)
+            if (assets.HaveBuiltChildAssets)
                 return;
 
             if (assets.IndexStart == assets.IndexEnd) {
-                assets.Expanded = true;
+                assets.HaveBuiltChildAssets = true;
                 var fileName = assets.FullPath.Substring(assets.FullPath.LastIndexOf('\\') + 1);
-                var child = new AssetDirectoryEncapsulator() { Expanded = true, FolderName = fileName, ListIndex = _assets.Count, FullPath = assets.FullPath };
+                var child = new AssetDirectoryEncapsulator(fileName) { HaveBuiltChildAssets = true, ListIndex = _assets.Count, FullPath = assets.FullPath };
                 assets.addChild(child);
                 _assets.Add(child);
                 return;
@@ -241,7 +256,7 @@ namespace dbx_file_handler {
                             //case 2: asset contains "commander" which in turn contains one file
                             //case 3: asset contains "flow" which contains only one folder, "logic" which contains x files, ends up with middle directory being stripped
 
-                            lastAsset.Expanded = true;
+                            lastAsset.HaveBuiltChildAssets = true;
                             if (!lastAsset.FolderName.EndsWith(".dbx")) {
                                 int fooIndex = lastAsset.FullPath.LastIndexOf('\\');
                                 lastAsset.FolderName = lastAsset.FolderName + lastAsset.FullPath.Substring(fooIndex);
@@ -250,7 +265,7 @@ namespace dbx_file_handler {
                         }
                     }
                     lastFolderName = folderName;
-                    lastAsset = new AssetDirectoryEncapsulator() { FolderName = folderName, IndexStart = i, IndexEnd = i, FullPath = path, ListIndex = _assets.Count, Expanded = endidx < 0 };
+                    lastAsset = new AssetDirectoryEncapsulator(folderName) { IndexStart = i, IndexEnd = i, ListIndex = _assets.Count, HaveBuiltChildAssets = endidx < 0, FullPath = path };
                     assets.addChild(lastAsset);
                     _assets.Add(lastAsset);
                 } else {
@@ -259,32 +274,32 @@ namespace dbx_file_handler {
                     }
                 }
             }
-            assets.Expanded = true;
+            assets.HaveBuiltChildAssets = true;
         }
 
         void item_Expanded(object sender, RoutedEventArgs e) {
-            var item = (DiceAssetTreeItem)sender;
-            var data = _assets[item.ListIndex];
+            var item = (AssetDirectoryEncapsulator)sender;
 
-            if (item.Items.Count > 0 && (item.Items[0] is DiceAssetTreeItem == false))
+            if (item.Items.Count > 0 && (item.Items[0] is AssetDirectoryEncapsulator == false))
                 item.Items.Clear();
 
-            if (data.Expanded == false) {
-                getExpandedView(ref data);
-                foreach (var dataChild in data.Children) {
-                    var child = new DiceAssetTreeItem(dataChild.FolderName, dataChild.ListIndex);
-                    child.Expanded += item_Expanded;
-                    item.Items.Add(child);
+            if (item.HaveBuiltChildAssets == false) {
+                getExpandedView(ref item);
+                foreach (var dataChild in item.Children) {
+                    dataChild.Expanded += item_Expanded;
+                    item.Items.Add(dataChild);
 
                     if (dataChild.IndexEnd > dataChild.IndexStart) {
-                        child.Items.Add("");
+                        dataChild.Items.Add("");
                     }
                 }
             }
         }
 
         public void onDeinit() {
-            //throw new NotImplementedException();
+            _tree.KeyUp -= _tree_KeyUp;
+            //todo: go through all items and remove event listener for them?
+            _tree.Items.Clear();
         }
 
         private List<DiceAsset> getAssetsRelatedToItem(AssetDirectoryEncapsulator asset)
@@ -294,6 +309,47 @@ namespace dbx_file_handler {
                 assets.Add(DbxApplication.DBX.GetDiceAsset(new FileInfo(_files[i])));
             }
             return assets;
+        }
+
+
+        private void onShowAssetInformation(object sender, RoutedEventArgs e)
+        {
+            showAdvancedAssetInformation(SelectedItem);
+        }
+
+        private void onExcludeAssets(object sender, RoutedEventArgs e)
+        {
+            SetTreeStyle(SelectedItem, false);
+            var assets = getAssetsRelatedToItem(SelectedItem);
+            _excludedItems = _excludedItems.Concat(assets).Distinct();
+        }
+
+        private void onReincludeAssets(object sender, RoutedEventArgs e)
+        {
+            SetTreeStyle(SelectedItem, true);
+            var assets = getAssetsRelatedToItem(SelectedItem);
+            _excludedItems = _excludedItems.Except(assets);
+        }
+
+        private void SetTreeStyle(AssetDirectoryEncapsulator item, bool included)
+        {
+            if (item.HaveBuiltChildAssets)
+            {
+                foreach (var child in item.Children)
+                {
+                    SetTreeStyle(child, included);
+                }
+            }
+            if (included)
+            {
+                item.FontStyle = FontStyles.Normal;
+                item.FontWeight = FontWeights.SemiBold;
+            }
+            else
+            {
+                item.FontStyle = FontStyles.Italic;
+                item.FontWeight = FontWeights.Normal;
+            }
         }
     }
 }

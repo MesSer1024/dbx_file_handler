@@ -24,14 +24,31 @@ namespace dbx_file_handler {
 
         public PopulateDatabaseScreen() {
             InitializeComponent();
+            _dbxRoot.Text = DbxApplication.SearchFolder;
         }
 
         private void clickPopulate(object sender, RoutedEventArgs e) {
-            clearCommand();
+            resetState();
             _cmd = new PopulateDatabaseCommand(this._dbxRoot.Text, false);
             _cmd.onSuccess += cmd_onSuccess;
             _cmd.onError += cmd_onError;
-            _cmd.invoke();
+            _cmd.onProgress += _cmd_onProgress;
+
+            _progressText.Content = "Searching for all DBX-files in folder: " + _dbxRoot.Text;
+            _popBtn.IsEnabled = false;
+            _loadBtn.IsEnabled = false;
+            _dbxRoot.IsReadOnly = true;
+            Task.Factory.StartNew(() => _cmd.invoke());
+            DbxApplication.SearchFolder = _dbxRoot.Text;
+        }
+
+        void _cmd_onProgress(dbx_lib.ProgressData data)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                var fileProgress = (data.FilesCompleted / (float)data.FilesTotal);
+                _progressText.Content = String.Format("Progress: {0}%", (int)(fileProgress * 100));
+            });
         }
 
         void cmd_onSuccess(string info) {
@@ -40,15 +57,18 @@ namespace dbx_file_handler {
 
         void cmd_onError(string info) {
             MessageBox.Show("Unknown error, check paths!");
-            clearCommand();
+            resetState();
         }
 
-        private void clearCommand() {
+        private void resetState() {
             if (_cmd != null) {
                 _cmd.onSuccess -= cmd_onSuccess;
                 _cmd.onError -= cmd_onError;
                 _cmd = null;
             }
+            _popBtn.IsEnabled = true;
+            _loadBtn.IsEnabled = true;
+            _dbxRoot.IsReadOnly = false;
         }
 
         public void onInit() {
@@ -56,7 +76,8 @@ namespace dbx_file_handler {
         }
 
         public void onDeinit() {
-            clearCommand();
+            resetState();
+            DbxApplication.saveInfo();
         }
 
         private void clickLoad(object sender, RoutedEventArgs e) {
@@ -66,7 +87,7 @@ namespace dbx_file_handler {
             fd.Multiselect = false;
             fd.InitialDirectory = Environment.CurrentDirectory;
             if (fd.ShowDialog() == true) {
-                clearCommand();
+                resetState();
                 _cmd = new PopulateDatabaseCommand(fd.FileName, true);
                 _cmd.onSuccess += cmd_onSuccess;
                 _cmd.onError += cmd_onError;

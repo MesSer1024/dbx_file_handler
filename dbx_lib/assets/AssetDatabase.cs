@@ -9,6 +9,8 @@ using Newtonsoft.Json;
 namespace dbx_lib.assets
 {
     using FBGuid = System.String;
+    using System.Threading.Tasks;
+    using System.Threading;
 
     class AssetDatabaseState {
         public ConcurrentDictionary<FBGuid, DiceAsset> GuidAssetTable = new ConcurrentDictionary<FBGuid, DiceAsset>();
@@ -21,24 +23,36 @@ namespace dbx_lib.assets
         private static ConcurrentDictionary<string, FBGuid> _fileGuidTable = new ConcurrentDictionary<string, FBGuid>();
         private static object _lock = new object();
 
-        public static void PopulateAsset(FileInfo[] files)
+        public static void PopulateAsset(FileInfo[] files, LibMain.ProgressCallback progressCallback)
         {
-            Console.WriteLine("Populating database assets: {0} files", files.Length);
+            var MAX_THREADS = 120;
+
             var start = DateTime.Now;
             int count = 0;
-            foreach (var file in files)
-            {
-                doBuildAsset(file);
-                count++;
-                if (count % 100 == 99)
-                {
-                    Console.Write(".");
-                }
+            var tasks = new List<Task>(files.Length);
+            var modifiedFiles = files.Distinct().OrderByDescending(a => a.Length);
+
+            var actions = new List<Action>();
+            foreach(var file in modifiedFiles) {
+                actions.Add(new Action(() => {
+                    doBuildAsset(file);
+                    var foo = Interlocked.Increment(ref count);
+                    if (foo == files.Length)
+                    {
+                        if (progressCallback != null)
+                            progressCallback.Invoke(new ProgressData(files.Length, 0, foo, 0, true));
+                    }
+                    else if (foo % 100 == 99)
+                    {
+                        if (progressCallback != null)
+                            progressCallback.Invoke(new ProgressData(files.Length, 0, foo, 0, false));
+                    }
+                }));
             }
-            Console.WriteLine("\nBuilding/Parsing {0} assets took {1}ms", count, (DateTime.Now - start).TotalMilliseconds);
+            System.Threading.Tasks.Parallel.Invoke(new System.Threading.Tasks.ParallelOptions() { MaxDegreeOfParallelism = MAX_THREADS }, actions.ToArray());
+
             start = DateTime.Now;
             updateReferencesInDatabase();
-            Console.WriteLine("Checking cross-references for {0} assets took {1}ms", _guidAssetTable.Count, (DateTime.Now - start).TotalMilliseconds);
         }
 
         public static void PopulateAsset(FileInfo file)

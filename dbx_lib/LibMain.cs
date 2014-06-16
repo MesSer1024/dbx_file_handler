@@ -12,8 +12,33 @@ using dbx_lib.assets;
 
 namespace dbx_lib
 {
+    public class ProgressData
+    {
+        public int FilesTotal { get; private set; }
+        public int BytesTotal { get; private set; }
+        public int FilesCompleted { get; private set; }
+        public int BytesCompleted { get; private set; }
+        public bool Finished { get; private set; }
+
+        private ProgressData()
+        {
+        }
+
+        internal ProgressData(int files, int bytes, int filesDone, int bytesDone, bool finished)
+        {
+            
+            FilesTotal = files;
+            BytesTotal = bytes;
+            BytesCompleted = bytesDone;
+            FilesCompleted = filesDone;
+            Finished = finished;
+        }
+    }
+
     public class LibMain
     {
+        public delegate void ProgressCallback(ProgressData data);
+
         public FileInfo[] GetDbxFiles(string rootFolder)
         {
             var dir = new DirectoryInfo(rootFolder.ToLower());
@@ -41,9 +66,9 @@ namespace dbx_lib
             return AssetDatabase.getAsset(file);
         }
 
-        public void PopulateAssets(FileInfo[] files)
+        public void PopulateAssets(FileInfo[] files, ProgressCallback progressCallback = null)
         {
-            AssetDatabase.PopulateAsset(files);
+            AssetDatabase.PopulateAsset(files, progressCallback);
         }
 
         public void saveDatabase(string path) {

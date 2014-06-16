@@ -7,15 +7,13 @@ using System.Threading.Tasks;
 
 namespace dbx_file_handler {
     public interface IMessage {
-        int MessageType { get; }
-        object Content { get; }
     }
 
     public interface IMessageListener {
         void onMessage(IMessage msg);
     }
 
-    static class MessageHandler {
+    public static class MessageHandler {
         private static List<IMessageListener> _listeners = new List<IMessageListener>();
 
         public static void addListener(IMessageListener listener) {
