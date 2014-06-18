@@ -1,0 +1,25 @@
+﻿<UserControl x:Class="dbx_file_handler.SearchGuidWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="400" d:DesignWidth="400">
+    <Grid Background="Black" MaxWidth="600" MaxHeight="400" Margin="50">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="1*" />
+        </Grid.RowDefinitions>
+        <DockPanel Background="DarkGray" Margin="4,4,4,0">
+            <Button DockPanel.Dock="Right" FontWeight="Bold" Content="X" Width="20" Height="20" Margin="0,0,5,0" Padding="-5" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Click="onClose" />
+            <Label Content="Search For GUID!" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontWeight="Bold" />
+        </DockPanel>
+        <DockPanel Grid.Row="1" Background="Yellow" Margin="4">
+            <Label DockPanel.Dock="Left" Content="Search GUID:" VerticalContentAlignment="Center" />
+            <Button DockPanel.Dock="Right" Content="SEARCH" Margin="0,5,5,5" Click="Button_Click_1" />
+            <TextBox DockPanel.Dock="Left" Name="_guid" MinWidth="200" VerticalContentAlignment="Center" Margin="5" KeyUp="TextBox_KeyUp_1" />
+        </DockPanel>
+        <TextBox Grid.Row="2" Name="_content" Margin="10" />
+    </Grid>
+</UserControl>

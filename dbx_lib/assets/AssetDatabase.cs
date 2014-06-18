@@ -116,6 +116,11 @@ namespace dbx_lib.assets
             return _fileGuidTable.Keys.ToList();
         }
 
+        internal static List<DiceAsset> getAllAssets()
+        {
+            return _guidAssetTable.Values.ToList();
+        }
+
         internal static void saveDatabase(string path) {
             var file = new FileInfo(path);
             if (!file.Directory.Exists)

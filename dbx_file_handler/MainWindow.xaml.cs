@@ -22,6 +22,7 @@ namespace dbx_file_handler
     public partial class MainWindow : Window, IMessageListener
     {
         private IScreen _screen;
+        private UIElement _screenOverlay;
 
         public MainWindow()
         {
@@ -48,6 +49,23 @@ namespace dbx_file_handler
                     _content.Children.Add(_screen as ShowDatabaseScreen);
                 });
             }
+            else if (msg is CloseOverlayScreen)
+            {
+                if (_screenOverlay != null)
+                {
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        _root.Children.Remove(_screenOverlay);
+                        _screenOverlay = null;
+                    });
+                }
+            }
+        }
+
+        private void MenuItem_Click_1(object sender, RoutedEventArgs e)
+        {
+            _screenOverlay = new SearchGuidWindow();
+            _root.Children.Add(_screenOverlay);
         }
     }
 }
