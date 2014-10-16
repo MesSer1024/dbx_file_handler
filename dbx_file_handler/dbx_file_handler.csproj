@@ -53,7 +53,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="commands\CloseOverlayScreen.cs" />
+    <Compile Include="commands\SelectAssetMessage.cs" />
     <Compile Include="MessageHandler.cs" />
+    <Compile Include="SearchGuidWindow.xaml.cs">
+      <DependentUpon>SearchGuidWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ShowDatabaseScreen.xaml.cs">
       <DependentUpon>ShowDatabaseScreen.xaml</DependentUpon>
     </Compile>
@@ -73,6 +78,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="PopulateDatabaseScreen.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SearchGuidWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

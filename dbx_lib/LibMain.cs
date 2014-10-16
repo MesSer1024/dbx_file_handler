@@ -82,5 +82,10 @@ namespace dbx_lib
         public List<string> getAllFilePaths() {
             return AssetDatabase.getAllFilePaths();
         }
+
+        public List<DiceAsset> getAllAssets()
+        {
+            return AssetDatabase.getAllAssets();
+        }
     }
 }
