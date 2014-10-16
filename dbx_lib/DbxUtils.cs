@@ -9,7 +9,7 @@ using dbx_lib.assets;
 
 namespace dbx_lib
 {
-    class DbxUtils
+    public class DbxUtils
     {
         public const int GUID_LENGTH = 36;
 

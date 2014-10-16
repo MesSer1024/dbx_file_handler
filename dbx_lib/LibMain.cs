@@ -39,13 +39,13 @@ namespace dbx_lib
     {
         public delegate void ProgressCallback(ProgressData data);
 
-        public FileInfo[] GetDbxFiles(string rootFolder)
+        public FileInfo[] GetFilesOfType(string rootFolder, string fileType)
         {
             var dir = new DirectoryInfo(rootFolder.ToLower());
             if (!dir.Exists)
-                throw new ArgumentException("Folder does not exist");
+                throw new ArgumentException(String.Format("Folder does not exist: {0}", rootFolder));
             Console.WriteLine("Searching for all dbx-files in folder:\n\t{0}", dir.FullName);
-            return dir.GetFiles("*.dbx", SearchOption.AllDirectories);
+            return dir.GetFiles("*." + fileType, SearchOption.AllDirectories);
         }
 
         public bool HasAsset(string guid) {
