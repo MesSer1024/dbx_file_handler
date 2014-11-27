@@ -27,7 +27,7 @@ namespace test_dbx_lib
         public static LibMain buildDb(string rootFolder = ROOT_FOLDER) {
             var lib = new LibMain();
             var start = DateTime.Now;
-            var files = lib.GetDbxFiles(rootFolder);
+            var files = lib.GetFilesOfType(rootFolder, "dbx");
             var time1 = DateTime.Now;
             Console.WriteLine("Finding all dbx-files ={0}ms", (time1 - start).TotalMilliseconds);
             lib.PopulateAssets(files);
@@ -46,7 +46,7 @@ namespace test_dbx_lib
         }
 
         public static void printDb(LibMain lib) {
-            var frontendFiles = lib.GetDbxFiles(Path.Combine(ROOT_FOLDER, "frontend"));
+            var frontendFiles = lib.GetFilesOfType(Path.Combine(ROOT_FOLDER, "frontend"), "dbx");
             foreach (var file in frontendFiles) {
                 var asset = lib.GetDiceAsset(file);
                 Console.WriteLine(asset);

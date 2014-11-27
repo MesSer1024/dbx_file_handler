@@ -31,7 +31,7 @@ namespace dbx_file_handler.commands {
                 if (_load) {
                     DbxApplication.DBX.loadDatabase(_root);
                 } else {                    
-                    var files = DbxApplication.DBX.GetDbxFiles(_root);
+                    var files = DbxApplication.DBX.GetFilesOfType(_root, "dbx");
                     Console.WriteLine("Finding all DBX-files in folder {0} took: {1}ms", _root, (DateTime.Now - start).TotalMilliseconds);
                     DbxApplication.DBX.PopulateAssets(files, reportedProgress);
                     Console.WriteLine("All done in {0}ms", (DateTime.Now - start).TotalMilliseconds);
